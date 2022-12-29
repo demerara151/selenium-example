@@ -11,8 +11,13 @@ def get_window_title():
     # Reference: https://github.com/SergeyPirogov/webdriver_manager
     service = ChromeService(
         executable_path=ChromeDriverManager().install(),
-        service_args=["start-maximized"],
     )
+
+    # オプションの作成
+    options = webdriver.ChromeOptions()
+
+    # オプションの追加（先頭の -- は不要）
+    options.add_argument("start-maximized")
 
     # ドライバーの作成
     driver = webdriver.Chrome(service=service)
