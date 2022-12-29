@@ -19,8 +19,11 @@ def get_window_title():
     # オプションの追加（先頭の -- は不要）
     options.add_argument("start-maximized")
 
+    # 試験的オプションの追加
+    # options.add_experimental_option("detach", True)
+
     # ドライバーの作成
-    driver = webdriver.Chrome(service=service)
+    driver = webdriver.Chrome(service=service, options=options)
 
     # 現在のブラウザのセッションで Web ページを読み込む
     driver.get("https://docs.python.org/ja/3/")
@@ -30,6 +33,8 @@ def get_window_title():
 
     # ページの要素を取得する
     page_title = driver.title
+
+    # ページのタイトルがコンソールに表示されれば成功
     print(f"Page title is: {page_title}")
 
     # ドライバーを終了する
