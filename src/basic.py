@@ -17,9 +17,11 @@ def get_window_title():
     options = webdriver.ChromeOptions()
 
     # オプションの追加（先頭の -- は不要）
+    # フルスクリーンでブラウザを開く
     options.add_argument("start-maximized")
 
     # 試験的オプションの追加
+    # ドライバーが閉じたあともブラウザを開いたままにする
     # options.add_experimental_option("detach", True)
 
     # ドライバーの作成
