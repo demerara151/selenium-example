@@ -33,6 +33,7 @@
 		"chromedriver",
 		"Colaboratory",
 		"conda",
+		"httpx",
 		"psycopg",
 		"pyenv",
 		"teratail",
