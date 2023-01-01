@@ -218,9 +218,11 @@ chcp 65001
 
 ## 代替手段
 
-そもそも本当に Selenium が必要ですか？Selenium を使う目的はなんですか？スクレイピング？ブラウザの自動操作？
+そもそも本当に Selenium が必要ですか？Selenium を使う目的はなんですか？クローリング？スクレイピング？ブラウザの自動操作？
 
-スクレイピングだけが目的の場合、Selenium を使う理由はほとんどありません。HTML を取得して、欲しい値が含まれている要素を探す (parse) か、API を叩いて情報 (json) を受け取ればいいだけです
+クローリングが目的なら、selenium でいいでしょう。Web ページのスクリーンショットを撮りたいというような場合も selenium を使う理由になります。もっと複雑なことがしたいのであれば、[scrapy] というフレームワークを使う手もあります
+
+しかしながら、Web スクレイピングだけが目的の場合、Selenium を使う理由はほとんどありません。HTML を取得して、欲しい値が含まれている要素を探す (parse) か、JSON レスポンスを返すサーバーにリクエストを投げるだけで済みます
 
 ブラウザの自動操作をする目的はなんでしょう？自身のブラウザの挙動をテストしたいということなら他にもっと適したツールが沢山あります。中でも人気が高いのは、[Cypress] です
 
@@ -246,7 +248,7 @@ with sync_playwright() as p:
 
 現代的なスクレイピング手法として効率的なライブラリは、[httpx] と [selectolax]、そして playwright です
 
-ブラウザの自動操作ができないとスクレイピングできないようなサイト(?)は、`playwright + selectolax`、そうでない場合は、`httpx + selectolax` または、`httpx + regex` が個人的にはおすすめです。ただし、リクエストが非同期である必要がないのであれば `requests` もまだまだ現役です
+ブラウザの自動操作ができないとスクレイピングできないようなサイトは、`playwright + selectolax`、そうでない場合は、`httpx + selectolax` または、`httpx + regex` が個人的にはおすすめです。ただし、リクエストが非同期である必要がないのであれば `requests` もまだまだ現役です
 
 ブラウザの自動操作だけが目的なら、そもそも Python である必要すらないかもしれません。GitHub で `automation` というキーワードで検索すると様々なプロジェクトが出てきます
 
@@ -260,6 +262,7 @@ with sync_playwright() as p:
 
 <!-- automation tool -->
 
+[scrapy]: https://scrapy.org/
 [cypress]: https://github.com/cypress-io/cypress
 [playwright]: https://github.com/microsoft/playwright
 

@@ -36,6 +36,7 @@
 		"httpx",
 		"psycopg",
 		"pyenv",
+		"scrapy",
 		"teratail",
 		"urllib",
 		"webapps",
