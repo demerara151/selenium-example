@@ -44,9 +44,11 @@ driver = webdriver.Chrome(service=service, options=options)
 
 # 指定した URL 先のページを読み込む
 url: str = "https://python.org"
-driver.get(url)
 
-driver.implicitly_wait(3)
+# timeout = 10 seconds
+driver.implicitly_wait(10)
+
+driver.get(url)
 
 window_title = driver.title
 print(window_title)

@@ -25,11 +25,11 @@ def get_window_title():
     # ドライバーの作成
     driver = webdriver.Chrome(service=service, options=options)
 
+    # ページロード終了時すぐに要素が見つからない場合に見つかるまで待機する時間の設定
+    driver.implicitly_wait(10)
+
     # 現在のブラウザのセッションで Web ページを読み込む
     driver.get("https://docs.python.org/ja/3/")
-
-    # ページが描画されるまで数秒待つ
-    driver.implicitly_wait(2)
 
     # ページの要素を取得する
     page_title = driver.title

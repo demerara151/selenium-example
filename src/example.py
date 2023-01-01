@@ -48,17 +48,18 @@ service = Service(executable_path=CHROME_DRIVER, log_path=LOG_PATH)
 # ドライバーの作成
 driver = webdriver.Chrome(service=service, options=options)
 
-# 指定した URL 先のページを読み込む
 url: str = "https://teratail.com"
+
+# timeout = 10 seconds
+driver.implicitly_wait(10)
+
+# 指定した URL 先のページを読み込む
 driver.get(url)
 
 # HTML から任意の要素を取得
 driver.find_element(
     "xpath", "/html/body/div/div[1]/header/div/div/a[2]"
 ).click()
-
-# ページが描画されるまで待つ
-driver.implicitly_wait(5)
 
 username = driver.find_element(
     "xpath", "/html/body/div/div[1]/div/span[1]/input"
@@ -72,8 +73,6 @@ username.send_keys(USERNAME)
 username.send_keys(PASSWORD)
 
 driver.find_element("xpath", "/html/body/div/div[1]/div/button").click()
-
-driver.implicitly_wait(5)
 
 # スクショを撮る
 screenshot: bytes = driver.get_screenshot_as_png()
