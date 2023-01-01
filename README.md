@@ -191,7 +191,7 @@ Selenium でエラーが発生した際のチェックリスト
 
 ## Windows におけるパスの扱い
 
-一般的に Windows でパスを指定する場合はバックスラッシュ `\` を使いますが、Chrome はフォワードスラッシュ `/` でパスを指定しても認識してくれます
+一般的に Windows でパスを指定する場合はバックスラッシュ `\` を使いますが、Chrome はフォワードスラッシュ `/` でパスを指定しても認識してくれます（厳密に言うと PowerShell では通用するという話です）
 
 ```powershell
 # パスは認識される
@@ -218,7 +218,7 @@ chcp 65001
 
 ## 代替手段
 
-果たして本当に Selenium が必要ですか？Selenium を使う目的はなんですか？スクレイピング？ブラウザの自動操作？
+そもそも本当に Selenium が必要ですか？Selenium を使う目的はなんですか？スクレイピング？ブラウザの自動操作？
 
 スクレイピングだけが目的の場合、Selenium を使う理由はほとんどありません。HTML を取得して、欲しい値が含まれている要素を探す (parse) か、API を叩いて情報 (json) を受け取ればいいだけです
 
@@ -240,13 +240,23 @@ with sync_playwright() as p:
     browser.close()
 ```
 
+---
+
 スクレイピングといえば、[BeautifulSoup]、[Requests]、Selenium の 3 本柱みたいに紹介されることが多いですが、どれも現代的な手法とは言えません。soup による parse は非常に遅く、requests は非同期に対応しておらず http2 も使えません。同様に selenium も playwright に劣る面が多々あります
 
 現代的なスクレイピング手法として効率的なライブラリは、[httpx] と [selectolax]、そして playwright です
 
 ブラウザの自動操作ができないとスクレイピングできないようなサイト(?)は、`playwright + selectolax`、そうでない場合は、`httpx + selectolax` または、`httpx + regex` が個人的にはおすすめです。ただし、リクエストが非同期である必要がないのであれば `requests` もまだまだ現役です
 
-ブラウザの自動操作だけが目的なら、そもそも Python である必要すらないかもしれません。GitHub で `automation` というキーワードで検索すると様々なプロジェクトが出てきます。<https://github.com/topics/automation>
+ブラウザの自動操作だけが目的なら、そもそも Python である必要すらないかもしれません。GitHub で `automation` というキーワードで検索すると様々なプロジェクトが出てきます
+
+<https://github.com/topics/automation>
+
+---
+
+**まとめ**
+
+自分の目的に適したツールを選びましょう
 
 <!-- automation tool -->
 
@@ -262,12 +272,4 @@ with sync_playwright() as p:
 
 ## LICENSE
 
-MIT License
-
-Copyright (c) <2022> <copyright demeraraonfire@gmail.com>
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+This project is licensed under the terms of the [MIT license](./LICENSE).
