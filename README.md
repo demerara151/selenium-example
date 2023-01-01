@@ -24,27 +24,32 @@ selenium の基本的な使い方と問題解決のための手引き
 
 私のやり方なので真似する必要はありません。このように構築した環境で実行していますということを明示するためです
 
-必要な環境が整っている方は、以下の内容を実行する必要はありません。あくまで確認のために書いてます
+> 必要な環境が整っている方は、以下の内容を実行する必要はありません
 
-PowerShell を開いて、次のコマンドを打ちます
+1. PowerShell を開いて、次のコマンドを打ちます
 
-```powershell
-winget install chrome
-scoop install python poetry
+    ```powershell
+    winget install chrome
+    scoop install python poetry
 
-# pip install selenium webdriver-manager
-poetry add selenium webdriver-manager
-```
+    ```
 
-> scoop の方の Chrome はバージョンの更新が遅れているため、winget でインストールしてます
+    > scoop の方の Chrome はバージョンの更新が遅れているため、winget でインストールしてます
 
-poetry で 仮想環境を作成します
+2. poetry で 仮想環境を作成します
 
-```powershell
-poetry new web-scraper
-cd web-scraper
-poetry install
-```
+    ```powershell
+    poetry new chrome-automation
+    cd chrome-automation
+    poetry install
+    ```
+
+3. `webdriver-manager` をインストールします
+
+    ```powershell
+    # pip install selenium webdriver-manager
+    poetry add selenium webdriver-manager
+    ```
 
 ## Anaconda Navigator を利用している場合の注意点
 
@@ -64,12 +69,12 @@ pip install -U selenium
 > 仮想環境を利用していない方は、`python --version` 以降を入力してください。とはいえ、今後のためにも仮想環境は作成しておいた方が何かと便利です
 
 ```powershell
-~\dev\repos\web-scraper > poetry shell
+~\dev\repos\chrome-automation > poetry shell
 
-(web-scraper-py3.11)web-scraper > python --version
+(chrome-automation-py3.11)chrome-automation > python --version
 Python 3.11.1
 
-(web-scraper-py3.11)web-scraper > pip show selenium
+(chrome-automation-py3.11)chrome-automation > pip show selenium
 Name: selenium
 Version: 4.7.2
 Summary:
@@ -77,7 +82,7 @@ Home-page: https://www.selenium.dev
 Author:
 Author-email:
 License: Apache 2.0
-Location: C:\Users\User\dev\repos\web-scraper\.venv\Lib\site-packages
+Location: C:\Users\User\dev\repos\chrome-automation\.venv\Lib\site-packages
 Requires: certifi, trio, trio-websocket, urllib3
 Required-by:
 ```
@@ -210,6 +215,50 @@ chcp 65001
 ## FAQ
 
 現在作成中
+
+## 代替手段
+
+果たして本当に Selenium が必要ですか？Selenium を使う目的はなんですか？スクレイピング？ブラウザの自動操作？
+
+スクレイピングだけが目的の場合、Selenium を使う理由はほとんどありません。HTML を取得して、欲しい値が含まれている要素を探す (parse) か、API を叩いて情報 (json) を受け取ればいいだけです
+
+ブラウザの自動操作をする目的はなんでしょう？自身のブラウザの挙動をテストしたいということなら他にもっと適したツールが沢山あります。中でも人気が高いのは、[Cypress] です
+
+どうしても Selenium の挙動が必要なんだという場合は、[PlayWright] というライブラリもあります。こちらは非同期にも対応しておりコンテキストマネージャーでドライバーを管理できるので効率的です。各種ブラウザ用のドライバーのインストールもコマンド一つで終わります。スクリプトで `webdriver-manager` をインポートしたり引数にドライバーのパスを指定したりする必要もありません
+
+<https://playwright.dev/python/docs/library>
+
+```python
+# playwright のコード例
+from playwright.sync_api import sync_playwright
+
+with sync_playwright() as p:
+    browser = p.chromium.launch()
+    page = browser.new_page()
+    page.goto("http://playwright.dev")
+    print(page.title())
+    browser.close()
+```
+
+スクレイピングといえば、[BeautifulSoup]、[Requests]、Selenium の 3 本柱みたいに紹介されることが多いですが、どれも現代的な手法とは言えません。soup による parse は非常に遅く、requests は非同期に対応しておらず http2 も使えません。同様に selenium も playwright に劣る面が多々あります
+
+現代的なスクレイピング手法として効率的なライブラリは、[httpx] と [selectolax]、そして playwright です
+
+ブラウザの自動操作ができないとスクレイピングできないようなサイト(?)は、`playwright + selectolax`、そうでない場合は、`httpx + selectolax` または、`httpx + regex` が個人的にはおすすめです。ただし、リクエストが非同期である必要がないのであれば `requests` もまだまだ現役です
+
+ブラウザの自動操作だけが目的なら、そもそも Python である必要すらないかもしれません。GitHub で `automation` というキーワードで検索すると様々なプロジェクトが出てきます。<https://github.com/topics/automation>
+
+<!-- automation tool -->
+
+[cypress]: https://github.com/cypress-io/cypress
+[playwright]: https://github.com/microsoft/playwright
+
+<!-- scraping tool -->
+
+[requests]: https://github.com/psf/requests
+[httpx]: https://github.com/encode/httpx/
+[selectolax]: https://github.com/rushter/selectolax
+[beautifulsoup]: https://pypi.org/project/beautifulsoup4/
 
 ## LICENSE
 
