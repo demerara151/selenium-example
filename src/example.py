@@ -1,6 +1,8 @@
 # type: ignore
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.wait import WebDriverWait
 
 # Chrome 本体の場所
 PROGRAM_BINARY: str = (
@@ -50,9 +52,6 @@ driver = webdriver.Chrome(service=service, options=options)
 
 url: str = "https://teratail.com"
 
-# timeout = 10 seconds
-driver.implicitly_wait(10)
-
 # 指定した URL 先のページを読み込む
 driver.get(url)
 
@@ -60,6 +59,13 @@ driver.get(url)
 driver.find_element(
     "xpath", "/html/body/div/div[1]/header/div/div/a[2]"
 ).click()
+
+# 指定した要素が見えるようになるまで待つ
+WebDriverWait(driver, timeout=60).until(
+    EC.visibility_of_element_located(
+        ("xpath", "/html/body/div/div[1]/div/span[1]/input")
+    )
+)
 
 username = driver.find_element(
     "xpath", "/html/body/div/div[1]/div/span[1]/input"
