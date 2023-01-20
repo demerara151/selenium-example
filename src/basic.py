@@ -27,7 +27,7 @@ def get_window_title():
     # ドライバーの作成
     driver = webdriver.Chrome(service=service, options=options)
 
-    # ページロード終了時すぐに要素が見つからない場合に見つかるまで待機する時間の設定
+    # ページ遷移終了時すぐに要素が見つからない場合に見つかるまでページロードを待機する時間の設定
     driver.implicitly_wait(10)
 
     # 現在のブラウザのセッションで Web ページを読み込む
