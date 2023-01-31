@@ -9,10 +9,9 @@ selenium の基本的な使い方と問題解決のための手引き
 次の環境で実行しています。このリポジトリの内容は下記の環境を前提に話をしています
 
 -   Windows 11 home 22H2
--   Python 3.9 ~ 3.11.1 (できれば 3.10 が望ましい)
--   Selenium 4.6 ~ 4.7.2
--   Google Chrome Version 108.0.5359.125 (Official Build) (64-bit)
--   chromedriver 108.0.5359.75
+-   Python 3.11.1
+-   Selenium 4.8.0
+-   Google Chrome Version 109
 
 以下の環境はオプションです。人によりけりです。好きなものを使ってください
 
@@ -76,7 +75,7 @@ Python 3.11.1
 
 (chrome-automation-py3.11)chrome-automation > pip show selenium
 Name: selenium
-Version: 4.7.2
+Version: 4.8.0
 Summary:
 Home-page: https://www.selenium.dev
 Author:
@@ -99,7 +98,7 @@ ChromeDriver 108.0.5359.71 (1e0e3868ee06e91ad636a874420e3ca3ae3756ac-refs/branch
 
 この場合、メジャーバージョンは 108 なので、これが Chrome のメジャーバージョンと一致しているか確認してください
 
-Chrome のバージョンは、設定画面の `About Chrome` で確認できます。`Version 108.0.5359.125 (Official Build) (64-bit)` と表示されていれば、メジャーバージョンは 108 です
+Chrome のバージョンは、設定画面の `About Chrome` で確認できます。`Version 108.0.5359.125 (Official Build) (64-bit)` のように表示されていれば、メジャーバージョンは 108 です
 
 > `pip install webdriver-manager` をしている人はこのバージョン確認作業は不要です
 
