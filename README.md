@@ -147,7 +147,7 @@ poetry install
 poetry で Python スクリプトを実行する場合は以下のようにします
 
 ```powershell
-poetry run python -m src.basic.py
+poetry run python -m src.basic
 ```
 
 また、エディターは VSCode を利用しているので、プロジェクトフォルダを VSCode で開けば全ての恩恵が受けられます
