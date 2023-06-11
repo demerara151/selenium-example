@@ -50,7 +50,7 @@ class WebScraper:
         options = webdriver.ChromeOptions()
 
         # from selenium 4.8.0, have to specify headless mode explicitly
-        # see https://www.selenium.dev/blog/2023/headless-is-going-away/ 
+        # see https://www.selenium.dev/blog/2023/headless-is-going-away/
         options.add_argument("headless=new")
 
         options.add_argument(f"profile-directory={self.profile}")
