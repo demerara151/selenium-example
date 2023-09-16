@@ -4,7 +4,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 
 
-def test_eight_components():
+def test_selenium_manager() -> None:
     options = webdriver.ChromeOptions()
 
     # If you don't have Chrome installed on your local machine,
@@ -13,7 +13,7 @@ def test_eight_components():
 
     # If you don't have chromedriver installed on your local machine,
     # Selenium Manager will install it automatically.
-    driver = webdriver.Chrome()
+    driver = webdriver.Chrome(options=options)
 
     driver.get("https://www.selenium.dev/selenium/web/web-form.html")
 
@@ -33,3 +33,7 @@ def test_eight_components():
     assert value == "Received!"
 
     driver.quit()
+
+
+if __name__ == "__main__":
+    test_selenium_manager()

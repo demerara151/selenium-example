@@ -4,20 +4,48 @@ selenium の基本的な使い方と問題解決のための手引き
 
 [teratail](https://terataile.com) 等の質問サイトで似たような質問がとても多いので自分自身の勉強のためにもリポジトリを作成しました
 
+## 最新情報
+
+Selenium v4.6.0 から実装された、Selenium Manager ですが、v4.11.0 から、ドライバーどころかブラウザーまでも管理してくれるようになりました。
+
+ブラウザーすら手動でインストールする必要がなくなり、ブラウザーやドライバーのバージョンを気にする必要もなくなりました。
+
+特定のブラウザーバージョンを指定して動かすことも可能です。これらの自動的にインストールされたプログラムは、ユーザーフォルダー直下の `~/.cache/selenium` 内に保管されます。以後、スクリプトを走らせるとはじめにこのキャッシュフォルダを確認し、存在していればそれを使い、なければ自動でダウンロードしてインストールされます。
+
+```python
+# バージョンの指定方法
+from selenium import webdriver
+
+options = webdriver.ChromeOptions()
+# チャンネルによる指定
+options.browser_version = "Stable"
+
+# またはバージョンナンバーによる指定
+options.browser_version = "115"
+
+# あとはいつも通り
+driver = webdriver.Chrome(options=options)
+driver.get("https://books.toscrape.com/")
+print(driver.title)
+driver.quit()
+```
+
+サンプルコード：[using_manager.py](/src/using_manager.py)
+
 ## 前提
 
 次の環境で実行しています。このリポジトリの内容は下記の環境を前提に話をしています
 
--   Windows 11 home 22H2
--   Python 3.11.1
--   Selenium 4.8.0
--   Google Chrome Version 109
+- Windows 11 home 22H2
+- Python 3.11.1
+- Selenium 4.8.0
+- Google Chrome Version 109
 
 以下の環境はオプションです。人によりけりです。好きなものを使ってください
 
--   Windows のパッケージマネージャーは winget と scoop の併用です
--   Python のパッケージマネージャーは poetry を利用しています
--   エディターは VSCode です
+- Windows のパッケージマネージャーは winget と scoop の併用です
+- Python のパッケージマネージャーは poetry を利用しています
+- エディターは VSCode です
 
 ## 環境構築手順
 
@@ -27,28 +55,28 @@ selenium の基本的な使い方と問題解決のための手引き
 
 1. PowerShell を開いて、次のコマンドを打ちます
 
-    ```powershell
-    winget install chrome
-    scoop install python poetry
+   ```powershell
+   winget install chrome
+   scoop install python poetry
 
-    ```
+   ```
 
-    > scoop の方の Chrome はバージョンの更新が遅れているため、winget でインストールしてます
+   > scoop の方の Chrome はバージョンの更新が遅れているため、winget でインストールしてます
 
 2. poetry で 仮想環境を作成します
 
-    ```powershell
-    poetry new chrome-automation
-    cd chrome-automation
-    poetry install
-    ```
+   ```powershell
+   poetry new chrome-automation
+   cd chrome-automation
+   poetry install
+   ```
 
 3. `webdriver-manager` をインストールします
 
-    ```powershell
-    # pip install selenium webdriver-manager
-    poetry add selenium webdriver-manager
-    ```
+   ```powershell
+   # pip install selenium webdriver-manager
+   poetry add selenium webdriver-manager
+   ```
 
 ## Anaconda Navigator を利用している場合の注意点
 
@@ -108,11 +136,11 @@ Selenium は chromedriver 以外のデフォルトのパスを自動で読み込
 
 以下の場所に該当するファイル、またはフォルダが存在しているか確認してください
 
--   Chrome 本体
-    `C:\Program Files\Google\Chrome\Application\chrome.exe`
+- Chrome 本体
+  `C:\Program Files\Google\Chrome\Application\chrome.exe`
 
--   プロファイル
-    `C:\Users\UserName\AppData\Local\Google\Chrome\User Data`
+- プロファイル
+  `C:\Users\UserName\AppData\Local\Google\Chrome\User Data`
 
 また、これ以外の場所に同一のファイルやフォルダがないかも確認してください。あれば削除してください
 
@@ -172,21 +200,21 @@ code .
 
 Selenium でエラーが発生した際のチェックリスト
 
--   [ ] Python のバージョンは 3.7 以上か
--   [ ] Selenium のバージョンは 4.0 以上か
--   [ ] chromedriver のバージョンは Chrome のバージョンと一致しているか。または、`webdriver-manager` を利用しているか
--   [ ] 仮想環境を利用していない場合、複数の Python がインストールされていないか。または古い使っていない Python が残っていないか
--   [ ] パスは正しいか。コードで指定している引数を付けて、`chrome.exe` を `PowerShell` 等で実行しても問題なく実行できるか
--   [ ] オプションの指定方法は正しいか。selenium 3.x と 4.x では指定方法が大きく異なるので注意
--   [ ] 裏で Chrome が動いていないか。クラッシュハンドラーのようなプロセスが動いてたりするので Chrome に関連してそうなタスクは全て停止しておく
--   [ ] Chrome のクッキーとキャッシュを削除する
--   [ ] Chrome の 設定をリセットする
--   [ ] Chrome をアンインストールして再インストールする
--   [ ] アンチウィルスソフトの常駐を一時的に止めてみる
--   [ ] FireWall の設定でサードパーティー制のアプリによる通信をブロックしていないか。Chrome は許可されているか
--   [ ] `--remote-debugging-port=9222` のようにポートナンバーを指定する
--   [ ] Windows 10 の場合、`--no-sandbox` で、Sandbox を無効化する
--   [ ] `--verbose --log-path=C:\logs\selenium.log` のように指定しログを取る
+- [ ] Python のバージョンは 3.7 以上か
+- [ ] Selenium のバージョンは 4.0 以上か
+- [ ] chromedriver のバージョンは Chrome のバージョンと一致しているか。または、`webdriver-manager` を利用しているか
+- [ ] 仮想環境を利用していない場合、複数の Python がインストールされていないか。または古い使っていない Python が残っていないか
+- [ ] パスは正しいか。コードで指定している引数を付けて、`chrome.exe` を `PowerShell` 等で実行しても問題なく実行できるか
+- [ ] オプションの指定方法は正しいか。selenium 3.x と 4.x では指定方法が大きく異なるので注意
+- [ ] 裏で Chrome が動いていないか。クラッシュハンドラーのようなプロセスが動いてたりするので Chrome に関連してそうなタスクは全て停止しておく
+- [ ] Chrome のクッキーとキャッシュを削除する
+- [ ] Chrome の 設定をリセットする
+- [ ] Chrome をアンインストールして再インストールする
+- [ ] アンチウィルスソフトの常駐を一時的に止めてみる
+- [ ] FireWall の設定でサードパーティー制のアプリによる通信をブロックしていないか。Chrome は許可されているか
+- [ ] `--remote-debugging-port=9222` のようにポートナンバーを指定する
+- [ ] Windows 10 の場合、`--no-sandbox` で、Sandbox を無効化する
+- [ ] `--verbose --log-path=C:\logs\selenium.log` のように指定しログを取る
 
 ## Windows におけるパスの扱い
 
