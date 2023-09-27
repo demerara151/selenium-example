@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "selenium-example"
-version = "1.0.0"
+version = "2.1.0"
 description = "Code example for selenium in python"
 authors = ["demerara151 <demeraraonfire@gmail.com>"]
 readme = "README.md"
