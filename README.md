@@ -1,27 +1,30 @@
 # Selenium Example
 
-selenium の基本的な使い方と問題解決のための手引き
-
-[teratail](https://terataile.com) 等の質問サイトで似たような質問がとても多いので自分自身の勉強のためにもリポジトリを作成しました
+Selenium の基本的な使い方と問題解決のための手引き
 
 ## 最新情報
 
-Selenium v4.6.0 から実装された、Selenium Manager ですが、v4.11.0 から、ドライバーどころかブラウザーまでも管理してくれるようになりました。
+Selenium v4.6.0 から実装された `Selenium Manager` ですが v4.11.0 からはドライバーどころかブラウザーまでも管理してくれるようになりました。
 
-ブラウザーすら手動でインストールする必要がなくなり、ブラウザーやドライバーのバージョンを気にする必要もなくなりました。
+もはやブラウザーすら手動でインストールする必要がなくなり、各々のバージョンを気にする必要もなくなりました。
 
-特定のブラウザーバージョンを指定して動かすことも可能です。これらの自動的にインストールされたプログラムは、ユーザーフォルダー直下の `~/.cache/selenium` 内に保管されます。以後、スクリプトを走らせるとはじめにこのキャッシュフォルダを確認し、存在していればそれを使い、なければ自動でダウンロードしてインストールされます。
+全ては `Chrome for Testing` が実装されたおかげです。通称 `CfT` は、Chrome が開発者のために作成した自動テスト専用のブラウザーです。普段使いを想定されていないため Chrome のダウンロードページには記載されていません。
+
+このテストバージョンのブラウザーは、テストのために必要な最低限のファイルのみで構成されており、JSON 形式の API エンドポイントからダウンロード及びインストールが可能です。`Selenium Manager` がダウンロードやインストールを自動化し、ユーザーフォルダー直下の `~/.cache/selenium` 内に保管して管理します。以後、スクリプトを走らせるとはじめにこのキャッシュフォルダを確認し、存在していればそれを使い、なければ自動でダウンロードしてインストールされます。
+
+### サンプルコード
 
 ```python
 # バージョンの指定方法
 from selenium import webdriver
 
 options = webdriver.ChromeOptions()
+
 # チャンネルによる指定
 options.browser_version = "Stable"
 
-# またはバージョンナンバーによる指定
-options.browser_version = "115"
+# またはバージョンナンバーによる指定も可能
+# options.browser_version = "115"
 
 # あとはいつも通り
 driver = webdriver.Chrome(options=options)
@@ -32,157 +35,99 @@ driver.quit()
 
 サンプルコード：[using_manager.py](/src/using_manager.py)
 
+チャンネルやバージョンナンバーを指定できることによりコードの再現性が高まります。環境による変化も最小限に抑えることができます。
+
 ## 前提
 
 次の環境で実行しています。このリポジトリの内容は下記の環境を前提に話をしています
 
-- Windows 11 home 22H2
-- Python 3.11.1
-- Selenium 4.8.0
-- Google Chrome Version 109
+- Windows 11 home 23H2
+- Python ^3.11
+- Selenium ^4.11.0
 
 以下の環境はオプションです。人によりけりです。好きなものを使ってください
 
-- Windows のパッケージマネージャーは winget と scoop の併用です
+- Windows のパッケージマネージャーは scoop を利用しています
 - Python のパッケージマネージャーは poetry を利用しています
 - エディターは VSCode です
 
-## 環境構築手順
+## 仮想環境の構築
 
-私のやり方なので真似する必要はありません。このように構築した環境で実行していますということを明示するためです
-
-> 必要な環境が整っている方は、以下の内容を実行する必要はありません
-
-1. PowerShell を開いて、次のコマンドを打ちます
-
-   ```powershell
-   winget install chrome
-   scoop install python poetry
-
-   ```
-
-   > scoop の方の Chrome はバージョンの更新が遅れているため、winget でインストールしてます
-
-2. poetry で 仮想環境を作成します
-
-   ```powershell
-   poetry new chrome-automation
-   cd chrome-automation
-   poetry install
-   ```
-
-3. `webdriver-manager` をインストールします
-
-   ```powershell
-   # pip install selenium webdriver-manager
-   poetry add selenium webdriver-manager
-   ```
-
-## Anaconda Navigator を利用している場合の注意点
-
-デフォルトでインストールできる selenium のバージョンが 3.1 とかなので、インストール後にアップデートしておく必要があります
-
-仮想環境をアクティベートした状態で、以下のコマンドを実行します
+まず始めに仮想環境を構築します。私は poetry を利用していますが、各々好みのツールで仮想環境を初期化してください。
 
 ```powershell
-conda activate <venv-name>
-pip install -U selenium
+poetry new automation-test
+cd automation test
+poetry add selenium
 ```
 
-## 環境の確認
+## 仮想環境の確認
 
-`poetry shell` は、`venv activate` と同様の仮想環境のアクティベートコマンドです。各自の方法で仮想環境を有効にしてください
+仮想環境を有効化して、ライブラリのバージョンを確認します。
 
-> 仮想環境を利用していない方は、`python --version` 以降を入力してください。とはいえ、今後のためにも仮想環境は作成しておいた方が何かと便利です
+再度 poetry を使った場合の例を挙げます。各自の方法で仮想環境を有効化しバージョンを確認してください。
+
+> 実際のところ poetry の場合は仮想環境を有効化しないでもインストールされているライブラリの詳細が確認できます。
 
 ```powershell
-~\dev\repos\chrome-automation > poetry shell
+~\automation-test > poetry shell
 
-(chrome-automation-py3.11)chrome-automation > python --version
-Python 3.11.1
+~\automation-test > poetry run python --version
+python 3.11.5
 
-(chrome-automation-py3.11)chrome-automation > pip show selenium
-Name: selenium
-Version: 4.8.0
-Summary:
-Home-page: https://www.selenium.dev
-Author:
-Author-email:
-License: Apache 2.0
-Location: C:\Users\User\dev\repos\chrome-automation\.venv\Lib\site-packages
-Requires: certifi, trio, trio-websocket, urllib3
-Required-by:
+~\automation-test > poetry show --tree
+selenium 4.13.0
+├── certifi >=2021.10.8
+├── trio >=0.17,<1.0
+│   ├── attrs >=20.1.0
+# 以下省略
 ```
 
 ここで表示されるバージョンが、[前提](#前提)と合致しているか確認してください
 
-chromedriver を手動でインストールした場合、バイナリへのパスを通すか、バイナリが保存されているディレクトリで、次のコマンドを実行してください
-
-```powershell
-.\chromedriver.exe --version
-
-ChromeDriver 108.0.5359.71 (1e0e3868ee06e91ad636a874420e3ca3ae3756ac-refs/branch-heads/5359@{#1016})
-```
-
-この場合、メジャーバージョンは 108 なので、これが Chrome のメジャーバージョンと一致しているか確認してください
-
-Chrome のバージョンは、設定画面の `About Chrome` で確認できます。`Version 108.0.5359.125 (Official Build) (64-bit)` のように表示されていれば、メジャーバージョンは 108 です
-
-> `pip install webdriver-manager` をしている人はこのバージョン確認作業は不要です
-
-## パスの確認
-
-Selenium は chromedriver 以外のデフォルトのパスを自動で読み込んでくれます
-
-以下の場所に該当するファイル、またはフォルダが存在しているか確認してください
-
-- Chrome 本体
-  `C:\Program Files\Google\Chrome\Application\chrome.exe`
-
-- プロファイル
-  `C:\Users\UserName\AppData\Local\Google\Chrome\User Data`
-
-また、これ以外の場所に同一のファイルやフォルダがないかも確認してください。あれば削除してください
-
-> 古くから Chrome を利用しており、長い間アンインストールして再インストールするといった作業を行っていない場合、`C:\Program Files (x86)` に、Chrome が保存されている場合があります。その場合は、別途コード内でパスを指定する必要があります
-
 ## ユーザープロファイルの利用
 
-ユーザープロファイルを作成して selenium で読み込みたい場合、まず初めにコマンド引数で間違いなく該当のプロファイルが読み込めるか確認してください
+`CfT` にはプロファイルがありません。そのため、プロファイルを利用したい場合は通常版の Chrome で利用しているプロファイルを指定する必要があります。
 
-```powershell
-& 'C:\Program Files\Google\Chrome\Application\chrome.exe' --profile-directory='Profile 2'
+通常版の Chrome は `C:/Users/UserName/AppData/Local/Google/Chrome/User Data/` にプロファイルを格納しています。
+
+```python
+PROFILE = "C:/Users/UserName/AppData/Local/Google/Chrome/User Data/Profile 2"
+options = webdriver.ChromeOptions()
+options.add_argument(f"profile-directory={PROFILE}")
 ```
-
-また、`C:\Users\UserName\AppData\Local\Google\Chrome\User Data` に該当のプロファイルが存在していることも合わせて確認してください。上記の場合は、`C:\Users\UserName\AppData\Local\Google\Chrome\User Data\Profile 2` です
 
 ## 最小のコードで試運転
 
 環境構築とバージョン確認が終わったので、最小のコードで問題なく動くか確認しましょう
 
-もし、これで動かないようであれば、上記の手順の中に問題がある可能性があります。再度確認してください
-
 このリポジトリの `src` フォルダにある [basic.py](./src/basic.py) をダウンロード、または内容をコピーして、自身の環境で実行してみてください
 
-リポジトリそのものをクローンして頂いても結構です。poetry を利用していれば環境構築はディレクトリの中で `poetry install` するだけで終わります
+```powershell
+# 仮想環境を有効化した状態で
+poetry run python -m src.basic
+```
+
+このリポジトリそのものをクローンして頂いても結構です。
 
 ```powershell
 git clone https://github.com/demerara151/selenium-example.git
 cd selenium-example
+
+# 仮想環境の初期化
 poetry install
-```
 
-poetry で Python スクリプトを実行する場合は以下のようにします
+# 仮想環境のアクティベート
+poetry shell
 
-```powershell
+# poetry で Python スクリプトを実行する場合は以下のようにします
 poetry run python -m src.basic
-```
 
-また、エディターは VSCode を利用しているので、プロジェクトフォルダを VSCode で開けば全ての恩恵が受けられます
-
-```powershell
+# また、エディターは VSCode を利用しているので、プロジェクトフォルダを VSCode で開けば全ての恩恵が受けられます
 code .
 ```
+
+もし、これで動かないようであれば、上記の手順の中に問題がある可能性があります。再度確認してください
 
 ## Troubleshoot
 
@@ -196,27 +141,56 @@ code .
 
 加えて任意のファイルにログを出力できます。ログを眺めて問題がどこにあるのか特定しましょう
 
-## チェックリスト
+### Windows 10 問題
 
-Selenium でエラーが発生した際のチェックリスト
+Windows 11 からセキュリティ機能の強化としてサンドボックスが導入されました。サンドボックスとは、通常の環境から完全に独立した全く同じ環境でプログラムを実行し問題がないか確認するための箱庭機能です。ここでプログラムを実行してウィルスに感染しても実際の環境には影響がありません。また、環境に起因してプログラムが動かないということがないかを試すのにも効果的です。
 
-- [ ] Python のバージョンは 3.7 以上か
-- [ ] Selenium のバージョンは 4.0 以上か
-- [ ] chromedriver のバージョンは Chrome のバージョンと一致しているか。または、`webdriver-manager` を利用しているか
+さて、このサンドボックス機能ですが Chrome v115 から標準で実装されることになりました。そして、Windows 10 にこの機能はありません。
+
+> 実際には、使用している Windows 10 がハードウェアの条件を満たしていればサンドボックスを有効化できます。しかしながら、多くの Windows 10 マシーンはこの条件を満たせません。
+
+ここで発生するのが Windows 10 サンドボックス問題です。Chrome は標準でサンドボックスを有効化してブラウザーを開こうとします。しかし、Windows 10 にはこの機能がないためブラウザーを開くことに失敗します。その際によく出力されるのが 「`DevToolsActivePort` ファイルが存在しません」というエラーです。
+
+```txt
+selenium.WebDriverException: unknown error: DevToolsActivePort file doesn't exist
+```
+
+解決方法は 2 つあります。1 つは Windows10 を Windows 11 にアップグレードすること。それが不可能な場合は、Chrome のサンドボックス機能が動かないように無効化します。
+
+これは Chrome のオプションフラッグを利用することで達成できます。
+
+```python
+options = webdriver.ChromeOptions()
+
+# サンドボックスの無効化
+options.add_argument("no-sandbox")
+
+# DevToolsActivePort ファイルを利用可能にするために必要なオプション
+options.add_argument("remote-debugging-port=9222")
+```
+
+ただし、サンドボックス機能を無効化することは推奨されていません。初めにも述べましたがこの機能はセキュリティを強化するために導入されています。
+
+chromedriver は非常に強力なツールで悪用されるとかなり危険です。公式の chromedriver の配布ページにも「本番環境ではどんな弊害が発生するかわからないため、必ずテスト環境で実行すること。」といったような注意書きがあるほどです。
+
+この「テスト環境」を簡単に用意できるのが今回説明したサンドボックス機能です。出来る限り Windows 11 にアップグレードすることをおすすめします。
+
+### チェックリスト
+
+Selenium スクリプト実行時にエラーが発生した際のチェックリストです
+
+- [ ] Python のバージョンは 3.8 以上か
+- [ ] Selenium のバージョンは 4.11 以上か
 - [ ] 仮想環境を利用していない場合、複数の Python がインストールされていないか。または古い使っていない Python が残っていないか
-- [ ] パスは正しいか。コードで指定している引数を付けて、`chrome.exe` を `PowerShell` 等で実行しても問題なく実行できるか
 - [ ] オプションの指定方法は正しいか。selenium 3.x と 4.x では指定方法が大きく異なるので注意
 - [ ] 裏で Chrome が動いていないか。クラッシュハンドラーのようなプロセスが動いてたりするので Chrome に関連してそうなタスクは全て停止しておく
-- [ ] Chrome のクッキーとキャッシュを削除する
-- [ ] Chrome の 設定をリセットする
-- [ ] Chrome をアンインストールして再インストールする
 - [ ] アンチウィルスソフトの常駐を一時的に止めてみる
 - [ ] FireWall の設定でサードパーティー制のアプリによる通信をブロックしていないか。Chrome は許可されているか
-- [ ] `--remote-debugging-port=9222` のようにポートナンバーを指定する
 - [ ] Windows 10 の場合、`--no-sandbox` で、Sandbox を無効化する
+- [ ] Windows 10 の場合、`--remote-debugging-port=9222` のようにポートナンバーを指定する
 - [ ] `--verbose --log-path=C:\logs\selenium.log` のように指定しログを取る
 
-## Windows におけるパスの扱い
+### Windows におけるパスの扱い
 
 一般的に Windows でパスを指定する場合はバックスラッシュ `\` を使いますが、Chrome はフォワードスラッシュ `/` でパスを指定しても認識してくれます（厳密に言うと PowerShell では通用するという話です）
 
@@ -239,21 +213,41 @@ chcp 65001
 
 以降、どこでフォワードスラッシュを使ってもパスを認識してくれるようになるはずです
 
-## FAQ
+## Selenium を使う目的
 
-現在作成中
+大きく分けて 3 つあります。
+
+1. ページのスクリーンショットを撮影する
+
+   これはページそのものをキャプチャする必要があるため、`urllib` や `requests` といったモジュールでは達成できません。
+
+2. スクレイピングを実行したいページに `iframe` が使われている
+
+   通常のリクエストでは iframe で読み込まれるコンテンツは取得できません。別途 iframe として埋め込まれている URL を指定して取得する必要があります。
+
+   Selenium を使えば簡単にフレームを切り替えることができるので便利です。
+
+3. Web サイトの挙動を確認する
+
+   これが最も大きな理由になるはずです。自身で作成したサイトが意図した通りに動いているかどうかを確かたい時こそ Selenium のような自動化テストツールが有効です。
+
+## Selenium を使う理由
+
+ここで質問です。あなたが Selenium を使う目的は何ですか？
+
+上記の 3 つのうちのどれかに目的が合致していますか？していないのであれば、そもそも Selenium を使う必要はないでしょう。
+
+Web スクレイピングだけが目的の場合 Selenium を使う理由はスクショか iframe 対策ぐらいのもです。静的な Web サイトであればサーバーにリクエストを投げて HTML を取得し、欲しい値が含まれている要素を探します。また、サイトの管理者が JSON レスポンスを返すような API を提供していれば、欲しい値が含まれている JSON を取得します。API が提供されているかどうかは、ブラウザーの開発者ツールのネットワークタブでも確認できます。
 
 ## 代替手段
 
-そもそも本当に Selenium が必要ですか？Selenium を使う目的はなんですか？クローリング？スクレイピング？ブラウザの自動操作？
+Selenium を使うには多少なりとも HTML や CSS に関する知識が要求されます。気軽にスクレイピングを試してみようと思ったのに、環境構築で躓いたりセレクターの指定方法が難解で何度やっても要素が見つからなかったりするのはよくあることです。
 
-クローリングが目的なら、selenium でいいでしょう。Web ページのスクリーンショットを撮りたいというような場合も selenium を使う理由になります。もっと複雑なことがしたいのであれば、[scrapy] というフレームワークを使う手もあります
+そこで、より初心者フレンドリーで気軽にスクレイピングを試せる PlayWright を紹介します。
 
-しかしながら、Web スクレイピングだけが目的の場合、Selenium を使う理由はほとんどありません。HTML を取得して、欲しい値が含まれている要素を探す (parse) か、JSON レスポンスを返すサーバーにリクエストを投げるだけで済みます
+### PlayWright
 
-ブラウザの自動操作をする目的はなんでしょう？自身のブラウザの挙動をテストしたいということなら他にもっと適したツールが沢山あります。中でも人気が高いのは、[Cypress] です
-
-どうしても Selenium の挙動が必要なんだという場合は、[PlayWright] というライブラリもあります。こちらは非同期にも対応しておりコンテキストマネージャーでドライバーを管理できるので効率的です。各種ブラウザ用のドライバーのインストールもコマンド一つで終わります。スクリプトで `webdriver-manager` をインポートしたり引数にドライバーのパスを指定したりする必要もありません
+PlayWright は Microsoft が開発しているオープンソースプロジェクトで、非同期リクエストにも対応しておりコンテキストマネージャーでドライバーを管理できます。各種ブラウザ用のドライバーのインストールもコマンド一つで終わり、ブラウザーを別途インストールする必要もありません。
 
 <https://playwright.dev/python/docs/library>
 
@@ -269,7 +263,11 @@ with sync_playwright() as p:
     browser.close()
 ```
 
----
+更に PlayWright には、ページ内の要素を指定するとセレクターを表示してくれる機能まであります。いちいち自身で HTML や CSS を勉強する必要もありません。PlayWright が認識できるコードの形で要素のセレクターを提示してくれます。
+
+`iframe` が埋め込まれたページもいちいちフレーム切り替えを行う必要はありません。自動でフレームを認識しフレーム内に指定された要素がないか探索してくれます。
+
+### 現代的スクレイピング手法
 
 スクレイピングといえば、[BeautifulSoup]、[Requests]、Selenium の 3 本柱みたいに紹介されることが多いですが、どれも現代的な手法とは言えません。soup による parse は非常に遅く、requests は非同期に対応しておらず http2 も使えません。同様に selenium も playwright に劣る面が多々あります
 
@@ -281,9 +279,7 @@ with sync_playwright() as p:
 
 <https://github.com/topics/automation>
 
----
-
-**まとめ**
+## まとめ
 
 自分の目的に適したツールを選びましょう
 

@@ -4,10 +4,9 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
-from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.common.by import By
 
 
 @dataclass(slots=True, frozen=True)
@@ -25,9 +24,9 @@ class WebScraper:
     """
 
     timeout: float = 10.0
-    profile: str = "Profile 1"
+    profile: str | None
 
-    def get_all_texts_from_elements(self, *, url: str, xpath: str) -> None:
+    def get_all_texts_from_elements(self, *, url: str, selector: str) -> None:
         """
         Load web page and scrape all the information of every colors.
         Write them as csv data to the `colors.csv`.
@@ -35,35 +34,33 @@ class WebScraper:
         Parameter
         ---
         url: The URL of web site that contains color information.
-        xpath: XPath of desired elements.
+        selector: XPath selector of desired elements.
 
         Return
         ---
-        Nothing returns. Quit the web driver and close the browser.
+        Nothing returns. Quit the webdriver and close the browser.
 
         """
 
-        service = ChromeService(
-            executable_path=ChromeDriverManager().install(),
-        )
-
         options = webdriver.ChromeOptions()
+        options.browser_version = "Stable"
 
         # from selenium 4.8.0, have to specify headless mode explicitly
         # see https://www.selenium.dev/blog/2023/headless-is-going-away/
         options.add_argument("headless=new")
 
-        options.add_argument(f"profile-directory={self.profile}")
+        if self.profile:
+            options.add_argument(f"profile-directory={self.profile}")
 
-        driver = webdriver.Chrome(service=service, options=options)
+        driver = webdriver.Chrome(options=options)
 
         driver.get(url)
 
         WebDriverWait(driver, self.timeout).until(
-            EC.element_to_be_clickable(("xpath", xpath))
+            EC.element_to_be_clickable((By.XPATH, selector))
         )
 
-        colors = driver.find_elements("xpath", xpath)
+        colors = driver.find_elements(By.XPATH, selector)
 
         csv_data: list[str] = [
             color.get_attribute("title").replace(" ", ",") for color in colors
@@ -73,11 +70,16 @@ class WebScraper:
             f.write("name,read,code\n")
             f.writelines(csv_data)
 
+        screenshot = driver.get_screenshot_as_png()
+
+        with Path("ScreenShot.png").open("wb") as f:
+            f.write(screenshot)
+
         driver.quit()
 
 
 if __name__ == "__main__":
     spider = WebScraper()
     spider.get_all_texts_from_elements(
-        url="https://www.colordic.org/w", xpath="//table/tbody/tr/td/a"
+        url="https://www.colordic.org/w", selector="//table/tbody/tr/td/a"
     )
