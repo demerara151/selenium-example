@@ -2,41 +2,6 @@
 
 Selenium の基本的な使い方と問題解決のための手引き
 
-## 最新情報
-
-Selenium v4.6.0 から実装された `Selenium Manager` ですが v4.11.0 からはドライバーどころかブラウザーまでも管理してくれるようになりました。
-
-もはやブラウザーすら手動でインストールする必要がなくなり、各々のバージョンを気にする必要もなくなりました。
-
-全ては `Chrome for Testing` が実装されたおかげです。通称 `CfT` は、Chrome が開発者のために作成した自動テスト専用のブラウザーです。普段使いを想定されていないため Chrome のダウンロードページには記載されていません。
-
-このテストバージョンのブラウザーは、テストのために必要な最低限のファイルのみで構成されており、JSON 形式の API エンドポイントからダウンロード及びインストールが可能です。`Selenium Manager` がダウンロードやインストールを自動化し、ユーザーフォルダー直下の `~/.cache/selenium` 内に保管して管理します。以後、スクリプトを走らせるとはじめにこのキャッシュフォルダを確認し、存在していればそれを使い、なければ自動でダウンロードしてインストールされます。
-
-### サンプルコード
-
-```python
-# バージョンの指定方法
-from selenium import webdriver
-
-options = webdriver.ChromeOptions()
-
-# チャンネルによる指定
-options.browser_version = "Stable"
-
-# またはバージョンナンバーによる指定も可能
-# options.browser_version = "115"
-
-# あとはいつも通り
-driver = webdriver.Chrome(options=options)
-driver.get("https://books.toscrape.com/")
-print(driver.title)
-driver.quit()
-```
-
-サンプルコード：[using_manager.py](/src/using_manager.py)
-
-チャンネルやバージョンナンバーを指定できることによりコードの再現性が高まります。環境による変化も最小限に抑えることができます。
-
 ## 前提
 
 次の環境で実行しています。このリポジトリの内容は下記の環境を前提に話をしています
@@ -51,7 +16,7 @@ driver.quit()
 - Python のパッケージマネージャーは poetry を利用しています
 - エディターは VSCode です
 
-## 仮想環境の構築
+### 仮想環境の構築
 
 まず始めに仮想環境を構築します。私は poetry を利用していますが、各々好みのツールで仮想環境を初期化してください。
 
@@ -61,7 +26,7 @@ cd automation test
 poetry add selenium
 ```
 
-## 仮想環境の確認
+### 仮想環境の確認
 
 仮想環境を有効化して、ライブラリのバージョンを確認します。
 
@@ -84,18 +49,6 @@ selenium 4.13.0
 ```
 
 ここで表示されるバージョンが、[前提](#前提)と合致しているか確認してください
-
-## ユーザープロファイルの利用
-
-`CfT` にはプロファイルがありません。そのため、プロファイルを利用したい場合は通常版の Chrome で利用しているプロファイルを指定する必要があります。
-
-通常版の Chrome は `C:/Users/UserName/AppData/Local/Google/Chrome/User Data/` にプロファイルを格納しています。
-
-```python
-PROFILE = "C:/Users/UserName/AppData/Local/Google/Chrome/User Data/Profile 2"
-options = webdriver.ChromeOptions()
-options.add_argument(f"profile-directory={PROFILE}")
-```
 
 ## 最小のコードで試運転
 
@@ -213,6 +166,54 @@ chcp 65001
 
 以降、どこでフォワードスラッシュを使ってもパスを認識してくれるようになるはずです
 
+## Selenium Manager
+
+Selenium v4.6.0 から実装された `Selenium Manager` ですが v4.11.0 からはドライバーどころかブラウザーまでも管理してくれるようになりました。
+
+もはやブラウザーすら手動でインストールする必要がなくなり、各々のバージョンを気にする必要もなくなりました。
+
+全ては `Chrome for Testing` が実装されたおかげです。通称 `CfT` は、Chrome が開発者のために作成した自動テスト専用のブラウザーです。普段使いを想定されていないため Chrome のダウンロードページには記載されていません。
+
+このテストバージョンのブラウザーは、テストのために必要な最低限のファイルのみで構成されており、JSON 形式の API エンドポイントからダウンロード及びインストールが可能です。`Selenium Manager` がダウンロードやインストールを自動化し、ユーザーフォルダー直下の `~/.cache/selenium` 内に保管して管理します。以後、スクリプトを走らせるとはじめにこのキャッシュフォルダを確認し、存在していればそれを使い、なければ自動でダウンロードしてインストールされます。
+
+### サンプルコード
+
+特に難しいことは必要ありません。ブラウザーのバージョンを指定するぐらいです。指定しなくても自動で最新版をインストールします。
+
+```python
+# バージョンの指定方法
+from selenium import webdriver
+
+options = webdriver.ChromeOptions()
+
+# バージョンの指定（Stable, Dev, Beta, Canary から選択）
+options.browser_version = "Stable"
+
+# またはバージョンナンバーによる指定も可能
+# options.browser_version = "115"
+
+# あとはいつも通り
+options.add_argument("headless=new")
+driver = webdriver.Chrome(options=options)
+driver.get("https://books.toscrape.com/")
+print(driver.title)
+driver.quit()
+```
+
+バージョン指定できることによりコードの再現性が高まります。環境による変化も最小限に抑えることができます。
+
+### ユーザープロファイルの利用
+
+`CfT` にはプロファイルがありません。そのため、プロファイルを利用したい場合は通常版の Chrome で利用しているプロファイルを指定する必要があります。
+
+通常版の Chrome は `C:/Users/UserName/AppData/Local/Google/Chrome/User Data/` にプロファイルを格納しています。
+
+```python
+PROFILE = "C:/Users/UserName/AppData/Local/Google/Chrome/User Data/Profile 2"
+options = webdriver.ChromeOptions()
+options.add_argument(f"profile-directory={PROFILE}")
+```
+
 ## Selenium を使う目的
 
 大きく分けて 3 つあります。
@@ -285,8 +286,6 @@ with sync_playwright() as p:
 
 <!-- automation tool -->
 
-[scrapy]: https://scrapy.org/
-[cypress]: https://github.com/cypress-io/cypress
 [playwright]: https://github.com/microsoft/playwright
 
 <!-- scraping tool -->
