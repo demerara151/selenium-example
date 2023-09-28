@@ -9,6 +9,7 @@ packages = [{ include = "src" }]
 [tool.poetry.dependencies]
 python = "^3.11"
 selenium = "^4.13.0"
+rich = "^13.5.3"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.2"
