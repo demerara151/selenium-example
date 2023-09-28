@@ -1,5 +1,6 @@
 """Example of scraping images using context manager with selenium manager"""
 from selenium import webdriver
+import uuid
 import asyncio
 from selenium.webdriver.common.by import By
 from dataclasses import dataclass
@@ -39,7 +40,7 @@ class Extractor:
         "Extract user name and list of image URLs from HTML"
         tree = HTMLParser(html)
         images = tree.css("figure img")
-        username = tree.css_first(".accountName>strong>a")
+        username = tree.css_first(".accountName > strong > a")
         return {
             "name": username.text(),
             "links": [image.attributes["src"] for image in images],
@@ -85,7 +86,7 @@ class Extractor:
         2. Create the database that contains
             user name and URL list of the images.
         3. Download those images and save it
-            with `{number}_{username}.jpg` format.
+            with `{username}_{uuid}.jpg` format.
 
         Gather these tasks and run asynchronously.
         """
@@ -108,14 +109,11 @@ class Extractor:
 
         # Asynchronously download and save the images
         download_tasks: list[asyncio.Task[None]] = []
-        for i, database_entry in enumerate(database, 1):
+        for database_entry in database:
             for img_url in database_entry["links"]:
                 task = asyncio.create_task(
                     self.save_img(
-                        f"""
-                        D:\\Pictures\\instagram\\{i:02}_
-                        {database_entry['name']}.jpg
-                        """,
+                        f"img\\{database_entry['name']}_{uuid.uuid4()}.jpg",
                         await self.fetch_img(img_url),
                     )
                 )
