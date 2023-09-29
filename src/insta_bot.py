@@ -80,7 +80,7 @@ class Extractor:
                 Please check your code."""
             )
 
-    async def main(self, profile_pages: list[str]) -> None:
+    async def main(self, profile_pages: list[str]):
         """
         1. Access to each profile pages asynchronously.
         2. Create the database that contains
@@ -90,37 +90,32 @@ class Extractor:
 
         Gather these tasks and run asynchronously.
         """
-        # Create a database to store the user name and image URLs
-        database: list[dict[str, str | list[str | None]]] = []
-
         # Asynchronously fetch the HTML for each profile page
-        html_tasks: list[asyncio.Task[str]] = []
-        for page_url in profile_pages:
-            task = asyncio.create_task(self.get_html(page_url))
-            html_tasks.append(task)
-
-        # Wait for all of the HTML fetch tasks to complete
-        await asyncio.gather(*html_tasks)
+        async with asyncio.TaskGroup() as tg:
+            html_documents = [
+                await tg.create_task(self.get_html(page_url))
+                for page_url in profile_pages
+            ]
 
         # Extract the user name and image URLs from the HTML
-        for html in html_tasks:
-            database_entry = await self.extract_img_url(html.result())
-            database.append(database_entry)
+        async with asyncio.TaskGroup() as tg:
+            database = [
+                await tg.create_task(self.extract_img_url(html))
+                for html in html_documents
+            ]
 
         # Asynchronously download and save the images
-        download_tasks: list[asyncio.Task[None]] = []
-        for database_entry in database:
-            for img_url in database_entry["links"]:
-                task = asyncio.create_task(
+        async with asyncio.TaskGroup() as tg:
+            [
+                await tg.create_task(
                     self.save_img(
-                        f"img\\{database_entry['name']}_{uuid.uuid4()}.jpg",
+                        f"img\\{record['name']}_{uuid.uuid4()}.jpg",
                         await self.fetch_img(img_url),
                     )
                 )
-                download_tasks.append(task)
-
-        # Wait for all of the download tasks to complete
-        await asyncio.gather(*download_tasks)
+                for record in database
+                for img_url in record["links"]
+            ]
 
 
 if __name__ == "__main__":
