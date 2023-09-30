@@ -73,7 +73,6 @@ class Extractor:
         # Extract the user name and image URLs from the HTML
         database = await self.create_database(html_documents)
 
-        # TODO: class Downloader
         dw = DataWriter()
         downloader = Downloader()
         # Asynchronously download and save the images
@@ -88,11 +87,18 @@ class Extractor:
             ]
 
     async def create_database(
-        self, html_documents: list[str]
+        self, html_list: list[str]
     ) -> list[dict[str, str | list[str]]]:
         """
-        Create the database contains the user name and image URLs
-        by extracting them from the each HTML documents.
+        Generates a database containing the username and image URLs
+        extracted from the corresponding HTML.
+
+        Args:
+            html_list: A list of HTML.
+
+        Returns:
+            A list of dictionaries,
+            where each dictionary contains the username and image URLs
         """
         parser = Parser()
         try:
@@ -101,7 +107,7 @@ class Extractor:
                     await tg.create_task(
                         parser.extract_username_and_img_urls(html)
                     )
-                    for html in html_documents
+                    for html in html_list
                 ]
         except* Exception as eg:
             for error in eg.exceptions:
