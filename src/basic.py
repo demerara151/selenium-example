@@ -1,34 +1,26 @@
-# type: ignore
 """Basic example of browser automation with selenium"""
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service as ChromeService
-from webdriver_manager.chrome import ChromeDriverManager
 
 
-def get_window_title():
-
-    # chromedriver のインストール
-    # Reference: https://github.com/SergeyPirogov/webdriver_manager
-    service = ChromeService(
-        executable_path=ChromeDriverManager().install(),
-    )
-
-    # オプションの作成
+def get_window_title() -> None:
+    # オプションインスタンスの作成
     options = webdriver.ChromeOptions()
 
-    # オプションの追加（先頭の -- は不要）
-    # フルスクリーンでブラウザを開く
-    options.add_argument("start-maximized")
+    # ブラウザーのバージョンを指定
+    options.browser_version = "Stable"
+
+    # ヘッドレスモードで開くオプションを追加（先頭の -- は不要）
+    options.add_argument("headless=new")  # type: ignore
 
     # 試験的オプションの追加
     # ドライバーが閉じたあともブラウザを開いたままにする
     # options.add_experimental_option("detach", True)
 
     # ドライバーの作成
-    driver = webdriver.Chrome(service=service, options=options)
+    driver = webdriver.Chrome(options=options)
 
     # ページ遷移終了時すぐに要素が見つからない場合に見つかるまでページロードを待機する時間の設定
-    driver.implicitly_wait(10)
+    driver.implicitly_wait(5)
 
     # 現在のブラウザのセッションで Web ページを読み込む
     driver.get("https://docs.python.org/ja/3/")
