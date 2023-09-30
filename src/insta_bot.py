@@ -39,15 +39,15 @@ class Extractor:
             html = response.text
             return html
 
-    # TODO: Change dictionary style to `username: URLs`.
     async def extract_img_url(self, html: str) -> dict[str, str | list[str]]:
-        "Extract user name and list of image URLs from HTML"
+        "Extract username and list of image URLs from HTML"
         tree = HTMLParser(html)
         images = tree.css("figure img")
         username = tree.css_first(".accountName > strong > a")
         return {
-            "name": username.text(),
-            "links": [image.attributes["src"] or "" for image in images],
+            username.text(): [
+                image.attributes["src"] or "" for image in images
+            ]
         }
 
     # TODO: class Downloader
@@ -93,13 +93,11 @@ class Extractor:
         async with asyncio.TaskGroup() as tg:
             [
                 await tg.create_task(
-                    self.save_img(
-                        f"img\\{record['name']}_{uuid.uuid4()}.jpg",
-                        await self.fetch_img(img_url),
-                    )
+                    self.save_img(name, await self.fetch_img(link))
                 )
                 for record in database
-                for img_url in record["links"]
+                for name, links in record.items()
+                for link in links
             ]
 
     async def create_database(
