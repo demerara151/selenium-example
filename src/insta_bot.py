@@ -41,20 +41,6 @@ class Extractor:
             html = response.text
             return html
 
-    # TODO: class Downloader
-    async def fetch_img(self, img_url: str) -> bytes:
-        """
-        Fetch image data from extracted image URL.
-
-        ### Parameter:
-        img_url: URL of the image.
-        """
-        async with httpx.AsyncClient(timeout=5.0) as client:
-            response = await client.get(img_url)
-            img = response.content
-            await asyncio.sleep(0.1)
-            return img
-
     async def main(self, profile_pages: list[str]) -> None:
         """
         Download all images and save it.
@@ -67,11 +53,12 @@ class Extractor:
 
         # TODO: class Downloader
         dw = DataWriter()
+        downloader = Downloader()
         # Asynchronously download and save the images
         async with asyncio.TaskGroup() as tg:
             [
                 await tg.create_task(
-                    dw.write_img(name, await self.fetch_img(link))
+                    dw.write_img(name, await downloader.fetch_image(link))
                 )
                 for record in database
                 for name, links in record.items()
@@ -120,7 +107,21 @@ class Extractor:
 
 @dataclass()
 class Downloader:
-    pass
+    async def fetch_image(self, img_url: str) -> bytes:
+        """
+        Fetches an image from the specified URL.
+
+        Args:
+            img_url: The URL of the image to fetch.
+
+        Returns:
+            The image bytes.
+        """
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            response = await client.get(img_url)
+            img = response.content
+            await asyncio.sleep(0.1)
+            return img
 
 
 @dataclass()
