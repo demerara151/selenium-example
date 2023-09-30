@@ -64,20 +64,6 @@ class Extractor:
             await asyncio.sleep(0.1)
             return img
 
-    # TODO: class DataWriter
-    async def save_img(self, username: str, img: bytes) -> None:
-        """
-        Save image as username with uuid.
-
-        ### Parameter:
-        name: User name.
-        img: Image data must be byte object.
-        """
-        filename = f"{username}_{uuid.uuid4()}.jpg"
-        print(f"Write image to {filename}")
-        with open(filename, "wb") as f:
-            f.write(img)
-
     async def main(self, profile_pages: list[str]) -> None:
         """
         Download all images and save it.
@@ -89,11 +75,12 @@ class Extractor:
         database = await self.create_database(html_documents)
 
         # TODO: class Downloader
+        dw = DataWriter()
         # Asynchronously download and save the images
         async with asyncio.TaskGroup() as tg:
             [
                 await tg.create_task(
-                    self.save_img(name, await self.fetch_img(link))
+                    dw.write_img(name, await self.fetch_img(link))
                 )
                 for record in database
                 for name, links in record.items()
@@ -144,7 +131,14 @@ class Downloader:
 
 @dataclass()
 class DataWriter:
-    pass
+    async def write_img(self, username: str, img: bytes) -> None:
+        """
+        Save an image with the username and UUID as the filename to the system.
+        """
+        filename = f"{username}-{uuid.uuid4()}.jpg"
+        print(f"Write an image to {filename}")
+        with open(filename, "wb") as f:
+            f.write(img)
 
 
 if __name__ == "__main__":
