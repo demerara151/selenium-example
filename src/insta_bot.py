@@ -151,7 +151,7 @@ class ImageDownloader:
             response = await client.get(img_url)
             response.raise_for_status()
             img = response.content
-            filename = f"{username}-{uuid.uuid4()}.jpg"
+            filename = f"img\\{username}-{uuid.uuid4()}.jpg"
             print(f"Write an image to {filename}")
             with open(filename, "wb") as f:
                 f.write(img)
