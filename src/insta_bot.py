@@ -35,7 +35,7 @@ class InstagramExtractor:
 
     async def create_database(
         self, profile_pages: list[str]
-    ) -> list[dict[str, str | list[str]]]:
+    ) -> list[dict[str, list[str]]]:
         """
         Generates a database containing the username and image URLs
         extracted from the corresponding HTML.
@@ -70,7 +70,7 @@ class InstagramExtractor:
 class InstagramParser:
     async def extract_username_and_img_urls(
         self, html: str
-    ) -> dict[str, str | list[str]]:
+    ) -> dict[str, list[str]]:
         """
         Extracts the username and a list of image URLs from HTML.
 
@@ -157,7 +157,7 @@ class ImageDownloader:
                 f.write(img)
 
     async def fetch_all_images(
-        self, database: list[dict[str, str | list[str]]]
+        self, database: list[dict[str, list[str]]]
     ) -> None:
         """
         Downloads and saves all the images
