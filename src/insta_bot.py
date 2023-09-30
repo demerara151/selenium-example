@@ -26,19 +26,22 @@ class ChromeBot:
 
 @dataclass()
 class Extractor:
-    # TODO: class Downloader
-    async def fetch_html(self, page_url: str) -> str:
+    async def fetch_html(self, url: str) -> str:
         """
-        Retrieve HTML from their profile page.
+        Retrieves the HTML from the specified URL.
 
-        ### Parameter:
-        page_url: URL of the profile page.
+        Args:
+            page_url: The URL of the HTML to retrieve.
+
+        Returns:
+            The retrieved HTML.
         """
         async with httpx.AsyncClient(timeout=1.0) as client:
-            response = await client.get(page_url)
+            response = await client.get(url)
             html = response.text
             return html
 
+    # TODO: Parser
     async def extract_img_url(self, html: str) -> dict[str, str | list[str]]:
         "Extract username and list of image URLs from HTML"
         tree = HTMLParser(html)
