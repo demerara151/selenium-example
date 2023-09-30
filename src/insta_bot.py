@@ -13,19 +13,89 @@ options = webdriver.ChromeOptions()
 options.add_argument("headless=new")  # type:ignore
 
 
-@dataclass()
-class ChromeBot:
-    url: str
+@dataclass(slots=True)
+class InstagramExtractor:
+    website: str
 
     def extract_post_urls(self, driver: webdriver.Chrome) -> list[str]:
-        "Extract all post page URLs from top page banner."
-        driver.get(self.url)
+        """
+        Extracts latest post's URL from the specified website.
+
+        Args:
+            driver: A Selenium ChromeDriver object.
+
+        Returns:
+            A list of latest post's URLs.
+        """
+        driver.get(self.website)
         links = driver.find_elements(By.CSS_SELECTOR, ".postListBig li a")
-        return [link.get_attribute("href") for link in links]  # type: ignore
+        return [
+            link.get_attribute("href") or "" for link in links  # type: ignore
+        ]
+
+    async def create_database(
+        self, profile_pages: list[str]
+    ) -> list[dict[str, str | list[str]]]:
+        """
+        Generates a database containing the username and image URLs
+        extracted from the corresponding HTML.
+
+        Args:
+            html_list: A list of HTML.
+
+        Returns:
+            A list of dictionaries,
+            where each dictionary contains the username and image URLs
+        """
+        parser = InstagramParser()
+        extractor = GenericExtractor()
+        html_list = await extractor.fetch_all_html(profile_pages)
+        try:
+            async with asyncio.TaskGroup() as tg:
+                database = [
+                    await tg.create_task(
+                        parser.extract_username_and_img_urls(html)
+                    )
+                    for html in html_list
+                ]
+        except* Exception as eg:
+            for error in eg.exceptions:
+                print(error)
+            raise
+        else:
+            return database
 
 
-@dataclass()
-class Extractor:
+@dataclass(slots=True)
+class InstagramParser:
+    async def extract_username_and_img_urls(
+        self, html: str
+    ) -> dict[str, str | list[str]]:
+        """
+        Extracts the username and a list of image URLs from HTML.
+
+        If URL is None or can't find it, returns empty string.
+
+        Args:
+            html: The HTML to extract the username and image URLs from.
+
+        Returns:
+            A dictionary containing the username as the key
+
+            and a list of image URLs as the value.
+        """
+        tree = HTMLParser(html)
+        images = tree.css("figure img")
+        username = tree.css_first(".accountName > strong > a")
+        return {
+            username.text(): [
+                image.attributes["src"] or "" for image in images
+            ]
+        }
+
+
+@dataclass(slots=True)
+class GenericExtractor:
     async def _fetch_html(self, url: str) -> str:
         """
         Retrieves the HTML from the specified URL.
@@ -63,128 +133,65 @@ class Extractor:
         else:
             return html
 
-    async def main(self, profile_pages: list[str]) -> None:
-        """
-        Download all images and save it.
-        """
-        # Asynchronously fetch the HTML for each profile page
-        html_documents = await self.fetch_all_html(profile_pages)
 
-        # Extract the user name and image URLs from the HTML
-        database = await self.create_database(html_documents)
-
-        dw = DataWriter()
-        downloader = Downloader()
-        # Asynchronously download and save the images
-        async with asyncio.TaskGroup() as tg:
-            [
-                await tg.create_task(
-                    dw.write_img(name, await downloader.fetch_image(link))
-                )
-                for record in database
-                for name, links in record.items()
-                for link in links
-            ]
-
-    async def create_database(
-        self, html_list: list[str]
-    ) -> list[dict[str, str | list[str]]]:
+@dataclass(slots=True)
+class ImageDownloader:
+    async def _fetch_image(self, username: str, img_url: str) -> None:
         """
-        Generates a database containing the username and image URLs
-        extracted from the corresponding HTML.
+        Downloads and saves an image from the specified URL.
 
         Args:
-            html_list: A list of HTML.
-
-        Returns:
-            A list of dictionaries,
-            where each dictionary contains the username and image URLs
-        """
-        parser = Parser()
-        try:
-            async with asyncio.TaskGroup() as tg:
-                database = [
-                    await tg.create_task(
-                        parser.extract_username_and_img_urls(html)
-                    )
-                    for html in html_list
-                ]
-        except* Exception as eg:
-            for error in eg.exceptions:
-                print(error)
-            raise
-        else:
-            return database
-
-
-@dataclass()
-class Downloader:
-    async def fetch_image(self, img_url: str) -> bytes:
-        """
-        Fetches an image from the specified URL.
-
-        Args:
-            img_url: The URL of the image to fetch.
+            username: The username.
+            img_url: The URL of the image to download.
 
         Returns:
             The image bytes.
         """
         async with httpx.AsyncClient(timeout=5.0) as client:
             response = await client.get(img_url)
+            response.raise_for_status()
             img = response.content
-            await asyncio.sleep(0.1)
-            return img
+            filename = f"{username}-{uuid.uuid4()}.jpg"
+            print(f"Write an image to {filename}")
+            with open(filename, "wb") as f:
+                f.write(img)
 
-
-@dataclass()
-class DataWriter:
-    async def write_img(self, username: str, img: bytes) -> None:
+    async def fetch_all_images(
+        self, database: list[dict[str, str | list[str]]]
+    ) -> None:
         """
-        Save an image with the username and UUID
-        as the filename to the system.
-        """
-        filename = f"{username}-{uuid.uuid4()}.jpg"
-        print(f"Write an image to {filename}")
-        with open(filename, "wb") as f:
-            f.write(img)
-
-
-@dataclass()
-class Parser:
-    async def extract_username_and_img_urls(
-        self, html: str
-    ) -> dict[str, str | list[str]]:
-        """
-        Extracts the username and a list of image URLs from HTML.
-
-        If URL is None or can't find it, returns empty string.
+        Downloads and saves all the images
+        from the specified database asynchronously.
 
         Args:
-            html: The HTML to extract the username and image URLs from.
-
-        Returns:
-            A dictionary containing the username as the key
-
-            and a list of image URLs as the value.
+            database: A list of dictionaries,
+            where each dictionary represents a record in the database.
+                The dictionary should contain the following keys:
+                * `name`: The name of the record.
+                * `links`: A list of URLs of the images to download.
         """
-        tree = HTMLParser(html)
-        images = tree.css("figure img")
-        username = tree.css_first(".accountName > strong > a")
-        return {
-            username.text(): [
-                image.attributes["src"] or "" for image in images
+        downloader = ImageDownloader()
+        async with asyncio.TaskGroup() as tg:
+            [
+                await tg.create_task(downloader._fetch_image(name, link))
+                for record in database
+                for name, links in record.items()
+                for link in links
             ]
-        }
 
 
 if __name__ == "__main__":
-    instagram = ChromeBot(URL)
-
+    # Extract post URLs
+    instagram = InstagramExtractor(URL)
     with webdriver.Chrome(options) as driver:
         driver.implicitly_wait(5.0)
         urls = instagram.extract_post_urls(driver)
         print(urls)
 
-    print("Start to extract images.")
-    extractor = Extractor()
-    asyncio.run(extractor.main(urls))
+    # Create database
+    database = asyncio.run(instagram.create_database(urls))
+    print(database)
+
+    # Download images
+    downloader = ImageDownloader()
+    asyncio.run(downloader.fetch_all_images(database))
