@@ -26,7 +26,7 @@ class ChromeBot:
 
 @dataclass()
 class Extractor:
-    async def fetch_html(self, url: str) -> str:
+    async def _fetch_html(self, url: str) -> str:
         """
         Retrieves the HTML from the specified URL.
 
@@ -39,6 +39,28 @@ class Extractor:
         async with httpx.AsyncClient(timeout=1.0) as client:
             response = await client.get(url)
             html = response.text
+            return html
+
+    async def fetch_all_html(self, urls: list[str]) -> list[str]:
+        """
+        Fetches the HTML from the specified URLs asynchronously.
+
+        Args:
+            urls: A list of URLs to fetch the HTML from.
+
+        Returns:
+            A list of the retrieved HTML.
+        """
+        try:
+            async with asyncio.TaskGroup() as tg:
+                html = [
+                    await tg.create_task(self._fetch_html(url)) for url in urls
+                ]
+        except* Exception as eg:
+            for error in eg.exceptions:
+                print(error)
+            raise
+        else:
             return html
 
     async def main(self, profile_pages: list[str]) -> None:
@@ -87,22 +109,6 @@ class Extractor:
             raise
         else:
             return database
-
-    # TODO: class Downloader
-    async def fetch_all_html(self, profile_pages: list[str]) -> list[str]:
-        # Asynchronously fetch the HTML for each profile page
-        try:
-            async with asyncio.TaskGroup() as tg:
-                html_documents = [
-                    await tg.create_task(self.fetch_html(page_url))
-                    for page_url in profile_pages
-                ]
-        except* Exception as eg:
-            for error in eg.exceptions:
-                print(error)
-            raise
-        else:
-            return html_documents
 
 
 @dataclass()
