@@ -65,16 +65,17 @@ class Extractor:
             return img
 
     # TODO: class DataWriter
-    async def save_img(self, name: str, img: bytes) -> None:
+    async def save_img(self, username: str, img: bytes) -> None:
         """
-        Save image as account name with serial number.
+        Save image as username with uuid.
 
         ### Parameter:
         name: User name.
         img: Image data must be byte object.
         """
-        print(f"Write image to {name}")
-        with open(name, "wb") as f:
+        filename = f"{username}_{uuid.uuid4()}.jpg"
+        print(f"Write image to {filename}")
+        with open(filename, "wb") as f:
             f.write(img)
 
     async def main(self, profile_pages: list[str]) -> None:
