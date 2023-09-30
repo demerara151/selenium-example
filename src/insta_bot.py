@@ -41,18 +41,6 @@ class Extractor:
             html = response.text
             return html
 
-    # TODO: Parser
-    async def extract_img_url(self, html: str) -> dict[str, str | list[str]]:
-        "Extract username and list of image URLs from HTML"
-        tree = HTMLParser(html)
-        images = tree.css("figure img")
-        username = tree.css_first(".accountName > strong > a")
-        return {
-            username.text(): [
-                image.attributes["src"] or "" for image in images
-            ]
-        }
-
     # TODO: class Downloader
     async def fetch_img(self, img_url: str) -> bytes:
         """
@@ -97,10 +85,13 @@ class Extractor:
         Create the database contains the user name and image URLs
         by extracting them from the each HTML documents.
         """
+        parser = Parser()
         try:
             async with asyncio.TaskGroup() as tg:
                 database = [
-                    await tg.create_task(self.extract_img_url(html))
+                    await tg.create_task(
+                        parser.extract_username_and_img_urls(html)
+                    )
                     for html in html_documents
                 ]
         except* Exception as eg:
@@ -136,12 +127,41 @@ class Downloader:
 class DataWriter:
     async def write_img(self, username: str, img: bytes) -> None:
         """
-        Save an image with the username and UUID as the filename to the system.
+        Save an image with the username and UUID
+        as the filename to the system.
         """
         filename = f"{username}-{uuid.uuid4()}.jpg"
         print(f"Write an image to {filename}")
         with open(filename, "wb") as f:
             f.write(img)
+
+
+@dataclass()
+class Parser:
+    async def extract_username_and_img_urls(
+        self, html: str
+    ) -> dict[str, str | list[str]]:
+        """
+        Extracts the username and a list of image URLs from HTML.
+
+        If URL is None or can't find it, returns empty string.
+
+        Args:
+            html: The HTML to extract the username and image URLs from.
+
+        Returns:
+            A dictionary containing the username as the key
+
+            and a list of image URLs as the value.
+        """
+        tree = HTMLParser(html)
+        images = tree.css("figure img")
+        username = tree.css_first(".accountName > strong > a")
+        return {
+            username.text(): [
+                image.attributes["src"] or "" for image in images
+            ]
+        }
 
 
 if __name__ == "__main__":
