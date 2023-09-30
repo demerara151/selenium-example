@@ -26,6 +26,7 @@ class ChromeBot:
 
 @dataclass()
 class Extractor:
+    # TODO: class Downloader
     async def fetch_html(self, page_url: str) -> str:
         """
         Retrieve HTML from their profile page.
@@ -38,6 +39,7 @@ class Extractor:
             html = response.text
             return html
 
+    # TODO: Change dictionary style to `username: URLs`.
     async def extract_img_url(self, html: str) -> dict[str, str | list[str]]:
         "Extract user name and list of image URLs from HTML"
         tree = HTMLParser(html)
@@ -48,6 +50,7 @@ class Extractor:
             "links": [image.attributes["src"] or "" for image in images],
         }
 
+    # TODO: class Downloader
     async def fetch_img(self, img_url: str) -> bytes:
         """
         Fetch image data from extracted image URL.
@@ -61,6 +64,7 @@ class Extractor:
             await asyncio.sleep(0.1)
             return img
 
+    # TODO: class DataWriter
     async def save_img(self, name: str, img: bytes) -> None:
         """
         Save image as account name with serial number.
@@ -75,8 +79,7 @@ class Extractor:
 
     async def main(self, profile_pages: list[str]) -> None:
         """
-        Download all images and save it
-        with `{username}_{uuid}.jpg` format.
+        Download all images and save it.
         """
         # Asynchronously fetch the HTML for each profile page
         html_documents = await self.fetch_all_html(profile_pages)
@@ -84,6 +87,7 @@ class Extractor:
         # Extract the user name and image URLs from the HTML
         database = await self.create_database(html_documents)
 
+        # TODO: class Downloader
         # Asynchronously download and save the images
         async with asyncio.TaskGroup() as tg:
             [
@@ -117,6 +121,7 @@ class Extractor:
         else:
             return database
 
+    # TODO: class Downloader
     async def fetch_all_html(self, profile_pages: list[str]) -> list[str]:
         # Asynchronously fetch the HTML for each profile page
         try:
@@ -131,6 +136,16 @@ class Extractor:
             raise
         else:
             return html_documents
+
+
+@dataclass()
+class Downloader:
+    pass
+
+
+@dataclass()
+class DataWriter:
+    pass
 
 
 if __name__ == "__main__":
