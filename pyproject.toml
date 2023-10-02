@@ -9,7 +9,7 @@ packages = [{ include = "src" }]
 [tool.poetry.dependencies]
 python = "^3.11"
 selenium = "^4.13.0"
-rich = "^13.5.3"
+rich = "^13.6.0"
 httpx = { extras = ["brotli"], version = "^0.25.0" }
 selectolax = "^0.3.16"
 
