@@ -3,6 +3,7 @@ import pytest
 from src.insta_bot import InstagramParser
 
 
+@pytest.mark.asyncio
 @pytest.mark.parametrize(
     "html, expected_result",
     [

@@ -16,6 +16,7 @@ selectolax = "^0.3.16"
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.2"
 anyio = "^4.0.0"
+pytest-asyncio = "^0.21.1"
 
 [build-system]
 requires = ["poetry-core"]
