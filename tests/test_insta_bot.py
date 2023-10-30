@@ -1,6 +1,6 @@
 import pytest
 
-from src.insta_bot import InstagramParser
+from src.insta_bot import InstagramExtractor
 
 
 @pytest.mark.asyncio
@@ -75,6 +75,6 @@ from src.insta_bot import InstagramParser
 async def test_extract_username_and_img_urls(
     html: str, expected_result: list[dict[str, str | list[str]]]
 ):
-    parser = InstagramParser()
+    parser = InstagramExtractor()
     actual_result = await parser.extract_username_and_img_urls(html)
     assert actual_result == expected_result
