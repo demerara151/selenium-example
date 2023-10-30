@@ -75,6 +75,6 @@ from src.insta_bot import InstagramExtractor
 async def test_extract_username_and_img_urls(
     html: str, expected_result: list[dict[str, str | list[str]]]
 ):
-    parser = InstagramExtractor()
-    actual_result = await parser.extract_username_and_img_urls(html)
+    extractor = InstagramExtractor()
+    actual_result = await extractor.extract_username_and_img_urls(html)
     assert actual_result == expected_result

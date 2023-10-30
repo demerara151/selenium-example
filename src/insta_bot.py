@@ -12,7 +12,7 @@ from selenium.webdriver.common.by import By
 
 
 @dataclass(slots=True)
-class InstagramExtractor:
+class InstagramFetcher:
     base_url: str = "https://instagrammernews.com/"
 
     @property
@@ -37,7 +37,7 @@ class InstagramExtractor:
         driver.implicitly_wait(10)
         return driver
 
-    def extract_post_urls(self) -> list[str]:
+    def fetch_post_urls(self) -> list[str]:
         """
         Extracts latest post's URL from the specified website.
 
@@ -51,54 +51,6 @@ class InstagramExtractor:
             driver.get(self.base_url)
             links = driver.find_elements(By.CSS_SELECTOR, ".postListBig li a")
             return [link.get_attribute("href") or "" for link in links]
-
-    async def create_database(
-        self, profile_pages: list[str]
-    ) -> list[dict[str, list[str]]]:
-        """
-        Generates a database containing the username and image URLs
-        extracted from the corresponding HTML.
-
-        Args:
-            html_list: A list of HTML.
-
-        Returns:
-            A list of dictionaries,
-            where each dictionary contains the username and image URLs
-        """
-
-        html_list = await self.fetch_html(profile_pages)
-        async with asyncio.TaskGroup() as tg:
-            tasks = [
-                tg.create_task(self.extract_username_and_img_urls(html))
-                for html in html_list
-            ]
-        return [task.result() for task in tasks]
-
-    async def extract_username_and_img_urls(
-        self, html: str
-    ) -> dict[str, list[str]]:
-        """
-        Extracts the username and a list of image URLs from HTML.
-
-        If URL is None or can't find it, returns empty string.
-
-        Args:
-            html: The HTML to extract the username and image URLs from.
-
-        Returns:
-            A dictionary containing the username as the key
-
-            and a list of image URLs as the value.
-        """
-        tree = HTMLParser(html)
-        images = tree.css("figure img")
-        username = tree.css_first(".accountName > strong > a")
-        return {
-            username.text(): [
-                image.attributes["src"] or "" for image in images
-            ]
-        }
 
     async def _fetch_html(self, url: str) -> str:
         """
@@ -128,7 +80,7 @@ class InstagramExtractor:
         """
         async with asyncio.TaskGroup() as tg:
             tasks = [tg.create_task(self._fetch_html(url)) for url in urls]
-        return [html.result() for html in tasks]
+        return [task.result() for task in tasks]
 
     async def _fetch_image(self, username: str, img_url: str) -> None:
         """
@@ -173,14 +125,66 @@ class InstagramExtractor:
         return None
 
 
+@dataclass(slots=True)
+class InstagramExtractor:
+    async def extract_username_and_img_urls(
+        self, html: str
+    ) -> dict[str, list[str]]:
+        """
+        Extracts the username and a list of image URLs from HTML.
+
+        If URL is None or can't find it, returns empty string.
+
+        Args:
+            html: The HTML to extract the username and image URLs from.
+
+        Returns:
+            A dictionary containing the username as the key
+
+            and a list of image URLs as the value.
+        """
+        tree = HTMLParser(html)
+        images = tree.css("figure img")
+        username = tree.css_first(".accountName > strong > a")
+        return {
+            username.text(): [
+                image.attributes["src"] or "" for image in images
+            ]
+        }
+
+    async def create_database(
+        self, html_list: list[str]
+    ) -> list[dict[str, list[str]]]:
+        """
+        Generates a database containing the username and image URLs
+        extracted from the corresponding HTML.
+
+        Args:
+            html_list: A list of HTML.
+
+        Returns:
+            A list of dictionaries,
+            where each dictionary contains the username and image URLs
+        """
+
+        async with asyncio.TaskGroup() as tg:
+            tasks = [
+                tg.create_task(self.extract_username_and_img_urls(html))
+                for html in html_list
+            ]
+        return [task.result() for task in tasks]
+
+
 if __name__ == "__main__":
     # Extract post URLs
-    instagram = InstagramExtractor()
-    urls = instagram.extract_post_urls()
+    fetcher = InstagramFetcher()
+    urls = fetcher.fetch_post_urls()
+    list_html = asyncio.run(fetcher.fetch_html(urls))
 
     # Create database
-    database = asyncio.run(instagram.create_database(urls))
+    extractor = InstagramExtractor()
+    database = asyncio.run(extractor.create_database(list_html))
     print(database)
 
     # Download images
-    asyncio.run(instagram.fetch_images(database))
+    asyncio.run(fetcher.fetch_images(database))
