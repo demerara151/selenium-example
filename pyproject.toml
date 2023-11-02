@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "selenium-example"
-version = "2.1.0"
+version = "2.1.1"
 description = "Code example for selenium in python"
 authors = ["demerara151 <demeraraonfire@gmail.com>"]
 readme = "README.md"
@@ -8,10 +8,10 @@ packages = [{ include = "src" }]
 
 [tool.poetry.dependencies]
 python = "^3.12"
-selenium = "^4.13.0"
+selenium = "^4.15.0"
 rich = "^13.6.0"
 httpx = { extras = ["brotli"], version = "^0.25.0" }
-selectolax = "^0.3.16"
+selectolax = "^0.3.17"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.2"
