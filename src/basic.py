@@ -37,3 +37,4 @@ def get_window_title() -> None:
 
 if __name__ == "__main__":
     get_window_title()
+

@@ -8,10 +8,11 @@ packages = [{ include = "src" }]
 
 [tool.poetry.dependencies]
 python = "^3.12"
-selenium = "^4.15.0"
+selenium = "^4.16.0"
 rich = "^13.6.0"
-httpx = { extras = ["brotli"], version = "^0.25.0" }
+httpx = { extras = ["brotli"], version = "^0.26.0" }
 selectolax = "^0.3.17"
+loguru = "^0.7.2"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.2"

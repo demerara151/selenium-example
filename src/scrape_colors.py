@@ -4,9 +4,9 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from selenium import webdriver
+from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
-from selenium.webdriver.common.by import By
 
 
 @dataclass(slots=True, frozen=True)
@@ -83,3 +83,4 @@ if __name__ == "__main__":
     spider.get_all_texts_from_elements(
         url="https://www.colordic.org/w", selector="//table/tbody/tr/td/a"
     )
+

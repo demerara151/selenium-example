@@ -5,7 +5,7 @@ import uuid
 from dataclasses import dataclass
 
 from httpx import AsyncClient
-from rich import print
+from loguru import logger
 from selectolax.parser import HTMLParser
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -33,6 +33,7 @@ class InstagramFetcher:
         "Chromedriver."
         options = webdriver.ChromeOptions()
         options.add_argument("headless=new")
+        logger.debug(options.arguments)
         driver = webdriver.Chrome(options)
         driver.implicitly_wait(10)
         return driver
@@ -50,6 +51,7 @@ class InstagramFetcher:
         with self._driver as driver:
             driver.get(self.base_url)
             links = driver.find_elements(By.CSS_SELECTOR, ".postListBig li a")
+            logger.debug(f"Total links: {len(links)}")
             return [link.get_attribute("href") or "" for link in links]
 
     async def _fetch_html(self, url: str) -> str:
@@ -65,6 +67,7 @@ class InstagramFetcher:
         async with self._client as client:
             response = await client.get(url)
             response.raise_for_status()
+            logger.debug(f"Status: {response.status_code}")
             html = response.text
             return html
 
@@ -96,10 +99,11 @@ class InstagramFetcher:
         async with self._client as client:
             response = await client.get(img_url)
             response.raise_for_status()
+            logger.debug(f"Status: {response.status_code}")
             img = response.content
             # FIXME: Image format can be png or something different.
             filename = f"img\\{username}-{uuid.uuid4()}.jpg"
-            print(f"Write an image to {filename}")
+            logger.info(f"Write an image to {filename}")
             with open(filename, "wb") as f:
                 f.write(img)
 
@@ -127,9 +131,7 @@ class InstagramFetcher:
 
 @dataclass(slots=True)
 class InstagramExtractor:
-    async def extract_username_and_img_urls(
-        self, html: str
-    ) -> dict[str, list[str]]:
+    async def extract_username_and_img_urls(self, html: str) -> dict[str, list[str]]:
         """
         Extracts the username and a list of image URLs from HTML.
 
@@ -146,15 +148,9 @@ class InstagramExtractor:
         tree = HTMLParser(html)
         images = tree.css("figure img")
         username = tree.css_first(".accountName > strong > a")
-        return {
-            username.text(): [
-                image.attributes["src"] or "" for image in images
-            ]
-        }
+        return {username.text(): [image.attributes["src"] or "" for image in images]}
 
-    async def create_database(
-        self, html_list: list[str]
-    ) -> list[dict[str, list[str]]]:
+    async def create_database(self, html_list: list[str]) -> list[dict[str, list[str]]]:
         """
         Generates a database containing the username and image URLs
         extracted from the corresponding HTML.
@@ -176,9 +172,12 @@ class InstagramExtractor:
 
 
 if __name__ == "__main__":
+    from rich import print
+
     # Extract post URLs
     fetcher = InstagramFetcher()
     urls = fetcher.fetch_post_urls()
+    print(urls)
     list_html = asyncio.run(fetcher.fetch_html(urls))
 
     # Create database
@@ -188,3 +187,4 @@ if __name__ == "__main__":
 
     # Download images
     asyncio.run(fetcher.fetch_images(database))
+
