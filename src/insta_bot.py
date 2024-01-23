@@ -9,6 +9,7 @@ from loguru import logger
 from selectolax.parser import HTMLParser
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.options import PageLoadStrategy
 
 
 @dataclass(slots=True)
@@ -33,6 +34,7 @@ class InstagramFetcher:
         "Chromedriver."
         options = webdriver.ChromeOptions()
         options.add_argument("headless=new")
+        options.page_load_strategy = PageLoadStrategy.eager
         logger.debug(options.arguments)
         driver = webdriver.Chrome(options)
         driver.implicitly_wait(10)
